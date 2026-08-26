@@ -45,6 +45,20 @@ python3 ../a7800-toolkit/tools/verify.py "Ballblazer (NTSC) (Atari-Lucasfilm) (1
 
 `src/rom.asm` is then a full listing, byte-identical when reassembled.
 
+Add `--gaps` for a text report of every byte reached as neither code nor a
+declared data block, or `--map` for the same picture as a heatmap (green
+code, blue declared data, red gap -- needs Pillow):
+
+```
+python3 ../a7800-toolkit/tools/disasm.py "Ballblazer (NTSC) (Atari-Lucasfilm) (1987) (A4C4808B).a78" -c annotations.json -o src --gaps --map
+```
+
+![Coverage map](docs/img/coverage-map.png)
+
+One true gap remains ($FFFF, a single byte -- see the ROM's own interrupt
+vector table in `annotations.json`, not visible at this resolution), which
+is why the map above reads as solid green and blue.
+
 ## Reproducing the live findings
 
 `run-01.inp` / `run-02.inp` / `run-03.inp` are MAME input recordings --
@@ -66,9 +80,12 @@ mame a7800 -rompath /path/to/bios -input_directory . \
 ```
 
 `tools/` holds this project's own probe/build scripts (`live-slots.lua`,
-`ball-raster.lua`, `build_coverage.py`, `build_gallery.py`, `build_html.py`) --
-generic instrument code lives in the toolkit itself, these are specific to
-questions this particular game raised.
+`ball-raster.lua`, `build_gallery.py`, `build_html.py`) -- generic
+instrument code lives in the toolkit itself, these are specific to
+questions this particular game raised. `build_coverage.py` is superseded
+by the toolkit's own `disasm.py --map` (above) and kept only for the
+`live-slots.json` overlay it also drew, which the toolkit version doesn't
+attempt to reproduce.
 
 ## Layout
 
@@ -78,7 +95,7 @@ questions this particular game raised.
 | `docs/FINDINGS.md` | The narrative -- read this first. |
 | `docs/sprites.html` | Graphics gallery (built with `tools/build_gallery.py` / `build_html.py`). |
 | `docs/color-cycle-table.txt`, `docs/dlwalk-output.txt` | Decoded reference data cited from `FINDINGS.md`. |
-| `docs/img/` | Screenshots cited as evidence for specific live findings. |
+| `docs/img/` | Screenshots cited as evidence for specific live findings, plus `coverage-map.png` (regenerate with `disasm.py --map`). |
 | `run-*.inp` | MAME input recordings the live findings were checked against. |
 | `tools/` | This project's own probe and build scripts. |
 | `Play Recording.command`, `Record Session.command` | Double-click launchers for replaying/recording a session (macOS + MAME on `PATH`). |
