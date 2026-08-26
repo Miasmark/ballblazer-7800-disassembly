@@ -680,6 +680,7 @@ path, and the spin's fragment selector now are.
 | `$8FBC`-`$8FFB`, the 64-byte gap before the math table | **resolved: genuinely unused** -- 92650 raw read-tap hits across a full recording, but every distinct PC involved is a RAM-operand or no-operand instruction with no reference to this range; same shared-bus DMA misattribution artifact as the dead slots 24/25 (item 9) | `rom:8FBC`, FINDINGS item 15 |
 | Why the HUD clock freezes after a goal | **confirmed live** -- `sub_D520` (the goal detector, also newly found) clears `ram_2026` bit 7 the instant a goal registers, which routes the per-frame dispatcher around the HUD digit writer entirely; bit 7 stays clear for a theme-song-paced ~5.2s while a scaled-down match-start reset (`sub_9D23`) runs, then gets restored | `rom:D520`, `rom:9B36` (fourth addition), FINDINGS item 16 |
 | The goal's point value (1, 2, or 3) | **confirmed live** -- `sub_D520` bands the ball's precision against the goalpost centre into `ram_22C0`, the "goal increment" `sub_9B36`'s score arithmetic adds in; previously an unexplained input | `rom:D520` |
+| NTSC vs. PAL | **compared** -- 51% of the ROM differs, but the split is clean: everything driven by the per-zone DLI chain (rendering, Rotosnap, possession, ship/ball/goalpost placement) was rewritten for PAL's scanline count; everything on the ordinary per-frame chain (scoring, HUD digits, match/round reset) is byte-identical. See "PAL comparison" below | `docs/img/pal-vs-ntsc-diff.png` |
 
 ## Closing the loose ends: eight items, all resolved
 
@@ -1882,3 +1883,73 @@ the one that wasn't safe.
 Byte-identity holds after every edit in this pass (round-trip re-verified
 after each boundary change individually, not just at the end). 45 `blocks`
 entries now cover the ROM, up from 27.
+
+## PAL comparison (2026-08-26)
+
+Compared against `Ballblazer (PAL) (Atari-Lucasfilm) (1987) (AFF85565).a78`
+(same size, same 128-byte header format, region byte and title differing as
+expected). RESET vector is identical (`$BA36`); NMI differs by 5 bytes
+(`$DF8B` NTSC, `$DF86` PAL).
+
+**Confirmed live first**, since region ports are exactly the kind of thing
+that can look fine and not be: booted the PAL dump in MAME's `a7800p`
+driver. It reaches the Lucasfilm logo (`docs/img/pal-boot-logo.png`) and
+the attract-mode corridor (`docs/img/pal-attract-corridor.png`) correctly,
+and the screen device reports a 49.92Hz refresh rate -- the real Atari
+7800 PAL rate, not just "the driver accepted the file."
+
+**Raw byte diff**: 16,781 of 32,768 bytes differ (51%), in 876 contiguous
+runs. First look made this seem like either a total rewrite or a simple
+"every timing constant retuned" pass (some early diffs are exactly that --
+`dat_982B`'s match-end delay bytes go `$58,$38` -> `$78,$48`, and every
+`$63` duration byte in `ThemeSongData` becomes `$52`, matching the
+50/60 = 0.833 PAL/NTSC frame-rate ratio almost exactly). Neither guess
+survives contact with the full picture: **7,118 of the differing bytes
+sit at instruction-opcode positions**, not just operands -- large stretches
+of actual code, not just constants, differ.
+
+![NTSC vs PAL byte diff](img/pal-vs-ntsc-diff.png)
+
+Green is identical, red differs, one pixel per byte, same 256-wide layout
+as the coverage map (`docs/img/coverage-map.png`) so the two are directly
+comparable. The picture is not "gameplay vs rendering" the way it first
+looks from the ratio of green to red -- checking every routine this
+document names against the diff map gives a sharper, more accurate split:
+
+| Region-independent (byte-identical) | Region-specific (rewritten) |
+|---|---|
+| `sub_9B36` -- score arithmetic, the whole scoring pool | `sub_D520` -- the goal detector itself |
+| `sub_97C6`/`TriggerMatchEnd` -- all three match-end causes | `VEC_996F` -- the overtime dispatcher |
+| `sub_982D` -- HUD digit writer | `DliHandler_GridMusic`, `RotationPhaseToFragment`, `sub_E378` |
+| `sub_9CF5`/`sub_9D23`/`sub_9D18` -- goal-width table, match/round reset | `sub_BD80`, `sub_BF35`, `sub_C0DD` -- ship/ball/goalpost placement (this session's own three finds) |
+| `sub_9DB7`/`sub_9DD0`/`sub_9E7A`/`sub_9EBB` -- goalpost position/slot system | `PickSpinFragment`, `PokeDisplayListByte`, `DlBuildTables`, `DlZonePtrLo/Hi` -- the zone-builder cluster |
+| `sub_B0FD`, `AttractAudioFork`, `LoadThemeSong`, `ThemeSongTick`, `NoteTable`, `SongStream2`, `GenerativeMusicStream` | `SteerTowardTarget`, `AngleToPhaseDelta`, `AdvanceRotationPhase`, `sub_D14A` -- Rotosnap end to end |
+| `EndSequenceCountdown`, `ReturnToAttract`, `sub_9929` | `PossessionCheck`, `BallOrbitPhysics`, `RotateOrbitVector`, `DistanceToBall` |
+| floor tiles, `PerspectiveTable`, `SpinEndInitTable`, `dat_8FBC`, the fragment sheet's start | `DrawGridScanlines`, `DliHandler_Grid`, `ColorCycleSuccessor`, `AdvanceRowColorPhase`, the boot siren, `ThemeSongData` itself |
+
+The actual boundary: **code driven by the per-zone DLI interrupt chain
+differs; code driven by the ordinary once-per-frame gameplay chain
+doesn't**, and it sorts almost every routine in this document correctly.
+`DliHandler_GridMusic` is the per-zone racing-the-beam handler -- it has to
+differ, because PAL's 312 total scanlines against NTSC's 262 is a
+different cycle budget for every single zone, the exact "shifted due to
+additional scanlines" pattern already on file for a different game in the
+toolkit's own `docs/pitfalls.md`. What's less obvious going in, and is the
+actual finding here: `sub_BD80`/`sub_BF35`/`sub_C0DD` (the ship, ball and
+goalpost placement this session spent most of its live-probing on) are
+*called from inside that same per-zone dispatcher*, not the ordinary
+gameplay chain -- confirmed earlier this session, not re-derived here --
+so they got swept into the PAL rewrite too, along with `PossessionCheck`
+and the whole Rotosnap chain feeding them. Score arithmetic, the HUD
+digit writer, and the goal-shrink/match-reset machinery run on the
+*other* chain and came through completely untouched.
+
+Net effect: this document's mechanisms are correct for PAL Ballblazer as
+described, but the *code* implementing item 3 (Rotosnap), item 14 (the
+ball), and the goalpost-placement half of item 9 physically differs
+byte-for-byte from what `annotations.json` currently maps -- a PAL
+`annotations.json` would need its own pass for those routines'
+addresses and exact bytes, even though every behaviour this document
+describes for them should still hold. Not attempted this pass; flagged
+rather than assumed correct by extension, per this project's own working
+discipline.
