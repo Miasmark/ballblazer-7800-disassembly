@@ -1,0 +1,72 @@
+at     zone lines  DL     DLI    holey DMA
+$23BC 0    16     $276F  -      16K
+        (empty -- the first entry's second byte was zero)
+$23BF 1    8      $276F  yes    16K
+        (empty -- the first entry's second byte was zero)
+$23C2 2    8      $2674  -      16K
+        (empty -- the first entry's second byte was zero)
+$23C5 3    8      $2638  -      16K
+        (empty -- the first entry's second byte was zero)
+$23C8 4    8      $25FC  -      16K
+        (empty -- the first entry's second byte was zero)
+$23CB 5    8      $25C0  -      16K
+        (empty -- the first entry's second byte was zero)
+$23CE 6    8      $2584  -      16K
+        (empty -- the first entry's second byte was zero)
+$23D1 7    8      $2548  yes    16K
+        at     bytes gfx     pal  width x    notes
+        $2548 4     $8875  0    24    244  
+        $254C 4     $888D  0    27    84   
+$23D4 8    8      $250C  -      16K
+        at     bytes gfx     pal  width x    notes
+        $250C 4     $18A8  0    24    248  
+        $2510 4     $18C0  0    31    88   
+$23D7 9    8      $24D0  -      16K
+        at     bytes gfx     pal  width x    notes
+        $24D0 4     $881F  0    24    248  
+        $24D4 4     $8837  0    24    88   
+$23DA 10   8      $2494  -      16K
+        at     bytes gfx     pal  width x    notes
+        $2494 4     $8085  0    24    248  
+        $2498 4     $809D  0    24    88   
+$23DD 11   8      $2458  -      16K
+        at     bytes gfx     pal  width x    notes
+        $2458 4     $1831  0    24    248  
+        $245C 4     $1849  0    24    88   
+$23E0 12   8      $241C  -      16K
+        at     bytes gfx     pal  width x    notes
+        $241C 4     $8020  0    24    248  
+        $2420 4     $8038  0    21    88   
+$23E3 13   1      $276F  -      16K
+        (empty -- the first entry's second byte was zero)
+$23E6 14   8      $275E  -      16K
+        at     bytes gfx     pal  width x    notes
+        $275E 5     $271A  5    20    40   extended: palette came from byte 3; indirect (character mode); write mode 1 (pairs with CTRL read mode)
+$23E9 15   8      $2765  yes    16K
+        at     bytes gfx     pal  width x    notes
+        $2765 5     $272E  5    32    12   extended: palette came from byte 3; indirect (character mode); write mode 1 (pairs with CTRL read mode)
+        $276A 5     $274E  5    2     140  extended: palette came from byte 3; indirect (character mode); write mode 1 (pairs with CTRL read mode)
+$23EC 16   2      $276F  -      16K
+        (empty -- the first entry's second byte was zero)
+$23EF 17   7      $276F  yes    16K
+        (empty -- the first entry's second byte was zero)
+$23F2 18   8      $2692  -      16K
+        (empty -- the first entry's second byte was zero)
+$23F5 19   8      $2656  -      16K
+        (empty -- the first entry's second byte was zero)
+$23F8 20   8      $261A  -      16K
+        (empty -- the first entry's second byte was zero)
+$23FB 21   8      $25DE  -      16K
+        (empty -- the first entry's second byte was zero)
+$23FE 22   8      $25A2  -      16K
+        (empty -- the first entry's second byte was zero)
+$2401 23   8      $2566  yes    16K
+        at     bytes gfx     pal  width x    notes
+        $2566 4     $8875  0    24    244  
+        $256A 4     $888D  0    27    84   
+$2404 24   8      $252A  -      16K
+        at     bytes gfx     pal  width x    notes
+        $252A 4     $18A8  0    24    248  
+        $252E 4     $18C0  0    31    88   
+
+25 zones, 194 scanlines total

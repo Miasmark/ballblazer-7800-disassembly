@@ -1,0 +1,325 @@
+<title>Ballblazer graphics dump</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1b1b1f; --muted: #6b6b76; --border: #dcdce2;
+    --card: #f7f7fa; --accent: #3d5aa8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16161a; --fg: #e8e8ee; --muted: #9a9aa6;
+      --card: #1f1f26; --border: #2e2e38; --accent: #7f9be0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16161a; --fg: #e8e8ee; --muted: #9a9aa6;
+    --card: #1f1f26; --border: #2e2e38; --accent: #7f9be0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg); margin: 0; padding: 32px;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 28px; font-size: 14px; }
+  h2 { font-size: 16px; margin: 36px 0 4px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .count { color: var(--muted); font-weight: normal; font-size: 13px; }
+  .desc { color: var(--muted); font-size: 13px; margin: 4px 0 16px; max-width: 720px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cell {
+    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px; text-align: center; overflow-x: auto; max-width: 260px;
+  }
+  .cell img { image-rendering: pixelated; display: block; margin: 0 auto 6px; max-width: 100%; }
+  .label { font-family: ui-monospace, monospace; font-size: 12px; }
+  .src { font-size: 11px; color: var(--muted); }
+  .charset-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px; }
+  .charset-wrap img { image-rendering: pixelated; }
+  .coverage-wrap { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .coverage-wrap img { image-rendering: pixelated; border: 1px solid var(--border); border-radius: 6px; max-width: 100%; }
+  .stats { font-size: 13px; }
+  .stats div { margin: 4px 0; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  table { border-collapse: collapse; font-size: 12px; width: 100%; max-width: 720px; }
+  th, td { text-align: left; padding: 4px 10px 4px 0; border-bottom: 1px solid var(--border); font-family: ui-monospace, monospace; }
+  th { color: var(--muted); font-weight: normal; }
+  .note { font-size: 13px; color: var(--muted); max-width: 720px; }
+</style>
+
+<h1>Ballblazer &mdash; known graphics dump</h1>
+<p class="sub">Every graphics address found across three live display-list captures (title screen, ordinary gameplay, match-end spin), rendered with the correct per-object width/height (<code>gfx.py --direct</code>), plus a full ROM coverage map so gaps are visible at a glance. Generated for visual review -- if the ship is here, it should be findable by eye even where static tracing hasn't named it.</p>
+
+<h2>Character set <span class="count">(256 characters, $A000-$A7FF, indirect mode -- confirmed)</span></h2>
+<p class="desc">Terrain tiles and the digit/letter font used for the title logo, HUD, and menus. Rendered with the toolkit's ordinary indirect-mode grid, which is the correct tool for this address.</p>
+<div class="charset-wrap"><img src="data:image/png;base64,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" width="192" height="384"></div>
+
+
+    <section>
+      <h2>Floor / corridor tiles <span class="count">(20)</span></h2>
+      <p class="desc">Confirmed: chequerboard diagonal-edge tiles and solid wall/sky fills. Same subsystem as DrawGridScanlines/AdvanceRowColorPhase. Not sprites.</p>
+      <div class="grid"><div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABTElEQVR4nO3WsQ1AABRFUWymMZHGVGrbWUBCIlG455Q/v3jlHff9GIB3lmW+vK/r9vkWAO5ND34AAH5FAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAoeYE6S0Exaz63SQAAAAASUVORK5CYII=" width="768" height="64" alt="$8020">
+      <div class="label">$8020 &middot; 24B wide</div>
+      <div class="src">title</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABcElEQVR4nO3cuw3CQBRFQZtuHVMEiStyQmsUABJCWP6dmXCjDY9ecMdpug8ARzLPj4/vy/Lc/C/ANd32/gAAwNYEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBntAAFnZzcI+JULEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOHSAgx24Q4AIEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkGMHCOALu0FwPS5AAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADl2gABWZjcIjs8FCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACDHDhDAzuwGwfZcgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgBy7AABnIzdIPifCxAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjh0ggIuzGwTvXIAAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAhpoXoVcpMYDpz2AAAAAASUVORK5CYII=" width="768" height="64" alt="$8033">
+      <div class="label">$8033 &middot; 24B wide</div>
+      <div class="src">gameplay/spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAABACAIAAABKhVI5AAABVUlEQVR4nO3boRGDQBRFUUi36BQRQ0WYtJYGMJkhgb2cI1etu/PFm5flOcFo1vW1+75t77//BeCKHmd/AAA4nsADQJDAA0CQwANAkMADQJDAA0CQwANA0GwHzx3YzQN344IHgCCBB4AggQeAIIEHgCCBB4AggQeAIIEHgCA7eNhhNw+MzgUPAEECDwBBAg8AQQIPAEECDwBBAg8AQQIPAEF28HAAu3ngalzwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABBkBw8nsJsHfs0FDwBBAg8AQQIPAEECDwBBAg8AQQIPAEECDwBBdvAwALt54FsueAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIsoOHILt5wAUPAEECDwBBAg8AQQIPAEECDwBBAg8AQQIPAEF28IDdPAS54AEgSOABIEjgASBI4AEgSOABIEjgASBI4AFg6vkAKRApMQSTipkAAAAASUVORK5CYII=" width="672" height="64" alt="$8038">
+      <div class="label">$8038 &middot; 21B wide</div>
+      <div class="src">title</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAABACAIAAABKhVI5AAABUElEQVR4nO3bMQ7CMBQFwYSLUuV8qbkdF0AURpHNZqa35G71i7ef52sD+OQ4nrO/AAx6jD4EANYl8AAQJPAAECTwABAk8AAQJPAAECTwABC028EDs9jZw3Vc8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQZAcPZNnZc2cueAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIsoMHGGRnz8pc8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQZAcPsCg7e37hggeAIIEHgCCBB4AggQeAIIEHgCCBB4AggQeAIDt4gJuys29zwQNAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkB08AJews5/LBQ8AQQIPAEECDwBBAg8AQQIPAEECDwBBAg8AQXbwAPwlO/vvXPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAsPW8AdQKGnlKw9pMAAAAAElFTkSuQmCC" width="672" height="64" alt="$804B">
+      <div class="label">$804B &middot; 21B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABb0lEQVR4nO3coRHCQBBA0cDQGOZ6iQZDBRgqwtAaDQSbY/Lfk3dm5Z8Ve1rX2zLD6/XcfH+/P7vPAnBkY1w33+/3x+6zwL84zx4AAGBvAggAyBFAAECOAAIAcgQQAJAjgACAHAEEAORcZt31ce8HAJjFBggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAg5+cdIHd9AICjsgECAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyLmMMTY/3PUBAI7KBggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggAGCp+QJk+hba0fUiZgAAAABJRU5ErkJggg==" width="768" height="64" alt="$8082">
+      <div class="label">$8082 &middot; 24B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABSklEQVR4nO3WoRGAQAADQaAzDBW9oSo03dEAGubndmVU5K3XdS8AMzuO/XUf4/z8CzCH7e8DAABfE0AAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAYKl5AKQABMX1cZwdAAAAAElFTkSuQmCC" width="768" height="64" alt="$8085">
+      <div class="label">$8085 &middot; 24B wide</div>
+      <div class="src">title</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABiklEQVR4nO3coRHCQBRFUaAzzPaCJoYKMFSEoTUaCC6TkNxz5KqVd75459vtfoKlvV7P2ff3+7P6XwCObIzr7Ps0PVb/y55ctv4AAMDaBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMg52wHiH9gNAvhP46A7Qy5AAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADl2gNglu0EAxzA22hlyAQIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIsQNEgt0ggKbxY2fIBQgAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgxw4QzLAbBHBsLkAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOXaAYAF2gwD2xQUIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIMcOEGzAbhDAtlyAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHLsAMEO2A0CWJYLEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAMCp5gvU3DCIJygRQwAAAABJRU5ErkJggg==" width="768" height="64" alt="$809A">
+      <div class="label">$809A &middot; 24B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABjElEQVR4nO3csREBQBRFUXQm0YuYRAUSFUm0pgEBZqydveeEG2145wdvezyeNnzudru+fL/fH8P/ArCyw2H/8v18vgz/C+vY/fsDAACjCSAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJCztQM0ht0ggDnZGWpyAQIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIsQM0KbtBAGuwMzQnFyAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHDtAi7AbBNBkZ+g7LkAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOXaAouwGAVDeGXIBAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMixA8Rb7AYBsNLOkAsQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4dIH7CbhAAM+8MuQABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5NgBYgp2gwAYyQUIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAYFPzBDXUNxL2eObHAAAAAElFTkSuQmCC" width="768" height="64" alt="$809D">
+      <div class="label">$809D &middot; 24B wide</div>
+      <div class="src">title</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABn0lEQVR4nO3csVHDQBRFUZvOSNSLY5xQAYkrckJrFIA8w2qwLOmeE2604Z0fvPPl8nGac7t9zb7f79+z7wAsM03vs+/X6+fqf4GKt1d/AABgbQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADknB/tAI2yGwSwTXaG4DcXIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAICcf9sBGmU3COAY7AyxRy5AAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkv2wEaZTcIoMnOEM/gAgQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQs5sdoFF2gwD4CztDTS5AAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADmH3QEaZTcIgGewM7RNLkAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOXaAFrIbBMAW2BlaxgUIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIMcO0ErsBgGwR9NBd4ZcgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgBONT8nQDqhzHeTkgAAAABJRU5ErkJggg==" width="768" height="64" alt="$80A0">
+      <div class="label">$80A0 &middot; 24B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABc0lEQVR4nO3coRHCQBRF0cDQYhQVRFMTKk2ikAgYQjbccxrYlXe+eKdluU3wtK73vb8AAJs7b/8EAMBYBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMi57P0BxjLP12kkdokA2IILEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOHSCGZpcIgC24AAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADk2AGCN9glAvgPLkAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOXaA4MDsEgF8xgUIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIMcOEPA1domAo3ABAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMixAwT8LbtEwCsuQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5doAAfsQuEYzDBQgAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIABgqnkAhAAYzg2HI8gAAAAASUVORK5CYII=" width="768" height="64" alt="$80B8">
+      <div class="label">$80B8 &middot; 24B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABg0lEQVR4nO3coQ3CYBhFUSAshmEXNBgmwHQiDKthkIiG0FJ6z5FNxS9vPvG2p9N5A982DLe33+/3x+xvAaZ1PB7efr9crrO/Bcbajf4TAGAlBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMjZ//oBrHPXx94PAEvmAgQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQYwcoyq4PAGUuQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5doBWwq4PAIznAgQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQYwdooez6AMB0XIAAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcuwAzcSuDwAshwsQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4doA/Z9QGA/+UCBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJBjB+jFrg8AdLgAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAGxqnq5jMfaulDz9AAAAAElFTkSuQmCC" width="768" height="64" alt="$881D">
+      <div class="label">$881D &middot; 24B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABg0lEQVR4nO3cLRZBURiGUSwTU8xFphiBYkSKqSkigXV/XM/e8aQTn/WFd304HFf8nuv18vL9drtP/hdgXPv97uX76XSe/C9QsZn7AwAAUxNAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgZzv3Byo+3fWx9wMA43EBAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMixA/Qluz4AsFwuQABAjgACAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5doCe7PoAQIcLEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAEDO3+4A2fUBAN5xAQIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIWcwOkF0fAGAoLkAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAObPtANn1AQDm4gIEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkDPYDpBdHwBgKVyAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAFY1D8q/MfbK44ccAAAAAElFTkSuQmCC" width="768" height="64" alt="$881F">
+      <div class="label">$881F &middot; 24B wide</div>
+      <div class="src">title</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABk0lEQVR4nO3cqw0CURRFUaAzDL2gwVABZirC0BoNDAkhzI+9lnzqyZ0rzv58vuzoGYb76Pvj8Zz9L8C0Tqfj6Pv1epv9L7AWh6U/AAAwNwEEAOQIIAAgRwABADkCCADIEUAAQI4AAgBy9naA+ITdIOAdO0NskQsQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4dICZhNwj4FTtDTMEFCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACDHDhCrYDcIWIqdoSYXIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcO0Bskt0gYCvsDK2TCxAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjh0gEuwGAf/KztB3XIAAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcuwAwQi7QQD/vTPkAgQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQYwcIfsBuEMC2doZcgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgB2NS9LgDqhwzqfSwAAAABJRU5ErkJggg==" width="768" height="64" alt="$8833">
+      <div class="label">$8833 &middot; 24B wide</div>
+      <div class="src">gameplay/spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABm0lEQVR4nO3cIXLCYBhFUcLOMOwFTQwrqGFFmG6tohI602aSNOGeIyMyv7zziTdcLtcDf3e/f7z8/nh8rv4WYFnn8+nl93G8rf4WYB7Hmf4DALAbAggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQMdoDWYTcI+ImdIVifCxAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjh2gjbIbBMzFzhA8cwECAHIEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyLED9CbsBgH/xc4Qe+QCBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJBjByjKbhCwF3aGWIILEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOHSB+xW4Q8K7sDDW5AAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADk2AFiEXaDAL7ZGdomFyAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHDtAbILdIIBp7AxN4wIEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAcKj5Ak2cOqFGdwiUAAAAAElFTkSuQmCC" width="768" height="64" alt="$8835">
+      <div class="label">$8835 &middot; 24B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABpUlEQVR4nO3coXUCQRhG0SWdYegFHUwqiKGNKDrApLWIyIBYTphl990rR4185xff7nh8n5ZwPn/efL9ev4f/BXiuw2F/8/10+hj+F2AZl8vX9Erelv4AAMBoAggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOTsltoBmstuEHCPnSFgLhcgACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgJzV7ADNZTcI+C92hmB7XIAAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcja7AzSX3SBgKXaGYDwXIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcO0APshsErIWdIfjLBQgAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgxw7QIHaDgK2yM8QauQABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5NgBelF2gwB+2RniGVyAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHLsAG2E3SCAx9gZanIBAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAJhqfgAWozycT4M0yQAAAABJRU5ErkJggg==" width="768" height="64" alt="$8837">
+      <div class="label">$8837 &middot; 24B wide</div>
+      <div class="src">title</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABbklEQVR4nO3cuRHCUBAFwQ9FirKIQDYxYSlJbEwodDHdEaw5tca7zPNjlCzLc+8TAICdXfc+AABgawIIAMgRQABAjgACAHIEEACQI4AAgBwBBADk3EbMNN3HkdglAoDt+QABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5OR2gI7GLhEAbM8HCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACDHDhBv7BIBUOADBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJBjB4hDs0sEwBp8gACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgBy7ADBB+wSAfwHHyAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHDtAcGJ2iQC+4wMEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkGMHCPgZu0TAWfgAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAIyaF1/mGM6nTk+TAAAAAElFTkSuQmCC" width="768" height="64" alt="$884B">
+      <div class="label">$884B &middot; 24B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABuklEQVR4nO3coXECQRSAYcikBETaiaEXdDCpIIZe0DmT1tIADub29v7vkyeYJ3aZf1a84+n0cQAAKHkbPQAAwNoEEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMg53u+/o2dIOJ8/H36/Xr9Xn6Xodvt5+H1Z/lafpcj5H8v5H8v53+b59wIEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkDPNHiB7FOZi78hc3K+5uF9zcb+2yQsQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQM7xcvkaPQMvYC/Ivtkjsm/u7765v9vkBQgAyBFAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAg5330ALPa2t4O+0L2vedjWZaX/A7b/H9wf2F9XoAAgBwBBADkCCAAIEcAAQA5AggAyBFAAECOAAIAcqbZA2TvDs+wp4dn2OsD++MFCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggAOBQ8w9VOVD7OgrgpQAAAABJRU5ErkJggg==" width="768" height="64" alt="$8875">
+      <div class="label">$8875 &middot; 24B wide</div>
+      <div class="src">title/gameplay/spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwAAAABACAIAAAAiU4coAAABtUlEQVR4nO3coXEDMRRAQTuTEgzSTog7MEoFxjFJBSFXkUlaCzU44HEmd9a9XSgkIGneCPz94fC2AwAoeVl7AwAASxNAAECOAAIAcgQQAJAjgACAHAEEAOQIIAAgRwABADkCCADIEUAAQI4AAgByBBAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIOf1dPpYew8J0/Q9u369/iy+l6Lj8X12/XL5WnwvRc7/upz/dTn/z8kPEACQI4AAgBwBBADkCCAAIEcAAQA5AggAyBFAAEDO/nz+XHsPzDA3YizmrIzF/RqL+zWWaZD75QcIAMgRQABAjgACAHIEEACQI4AAgBwBBADkCCAAIMccoI0YZe4CjzEHZdvc321zf5+THyAAIEcAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHHOAoswd4ZY5JdzyPlB4H/wAAQA5AggAyBFAAECOAAIAcgQQAJAjgACAHAEEAOSYA8RdzAXhL7Y6R4RleH/4j/fHDxAAkCOAAIAcAQQA5AggACBHAAEAOQIIAMgRQADAruYXbO1JGppoulIAAAAASUVORK5CYII=" width="768" height="64" alt="$8889">
+      <div class="label">$8889 &middot; 24B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA2AAAABACAIAAADztINYAAABz0lEQVR4nO3cPU4CQRiAYfAMFF7HhmtYUVBL4wlsuAs1NF7NSrOvwURC+NnlearNVFPsTN5M8c0Xi+cZAAB8e/r5AgAAgQgAwG8CEQCAEIgAAIRABAAgBCIAACEQAQAIgQgAQAhEAABCIAIAEAIRAIAQiAAAhEAEACAEIgAAIRABAAiBCABACEQAAEIgAgAQAhEAgBCIAACEQAQAIAQiAAAhEAEAiPlut+8KF7Fcvhxd32zer76XR7TdfhxdPxw+r76XR+T/vy3//31arV5vvQX4kxdEAABCIAIAEAIRAIAQiAAAhEAEACAEIgAAIRABAIj5ev02O8bcrHExZ25cnK9xcb7GxfmaBnMib8sLIgAAIRABAAiBCABACEQAAEIgAgAQAhEAgBCIAAD8bw7iqcydmjZz4KbN+Z0253fanN/HtLrwnEgviAAAhEAEACAEIgAAIRABAAiBCABACEQAAEIgAgBwmTmIpzK3iSFz2hhyPzDkfmDI/XAdXhABAAiBCABACEQAAEIgAgAQAhEAgBCIAACEQAQA4D7mIJ7K3CPOYY4a53D/cA73D2O8f7wgAgAQAhEAgBCIAACEQAQAIAQiAAAhEAEACIEIAMBs6AtWj1ap4ZBg4QAAAABJRU5ErkJggg==" width="864" height="64" alt="$888D">
+      <div class="label">$888D &middot; 27B wide</div>
+      <div class="src">title/gameplay/spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA2AAAABACAIAAADztINYAAABe0lEQVR4nO3cqw3CABhG0ZYZEGyHQqAZAsMuaDCshoJwCQLBm3NUU9FU3vziG6fT2QAAACeT8xMAAAhEAACuCUQAAEIgAgAQAhEAgBCIAACEQAQAIAQiAAAhEAEACIEIAEAIRAAAQiACABACEQCAEIgAAIRABAAgBCIAACEQAQAIgQgAQAhEAABCIAIAEAIRAIAQiAAAhEAEACAEIgAAIRABAAiBCABACEQAAEIgAgAQAhEAgBCIAACEQAQAIMbtdtc3xGIxf/cvAAC8lAsiAAAhEAEACIEIAEAIRAAAQiACABACEQCAEIgAAMS4XK6GR9hs1jff7/eHh3yfz2QnEgB+jwsiAAAhEAEACIEIAEAIRAAAQiACABACEQCAEIgAADxnB/Hf2H3kHnYiAfhGLogAAIRABAAgBCIAACEQAQAIgQgAQAhEAABCIAIAEHYQuYvdR57BTiTAZ3JBBAAgBCIAACEQAQAIgQgAQAhEAABCIAIAEAIRAIDh0hHDEBa89ylQTQAAAABJRU5ErkJggg==" width="864" height="64" alt="$88A1">
+      <div class="label">$88A1 &middot; 27B wide</div>
+      <div class="src">gameplay</div>
+    </div></div>
+    </section>
+    <section>
+      <h2>Long-range opponent marker (zones 20-22) <span class="count">(5)</span></h2>
+      <p class="desc">CONFIRMED: the opponent ship&#x27;s long-range representation. 4px wide, palette 4. A live capture shows the opponent renders as exactly one of these dots while far away, then switches to the fragment-assembled silhouette below once close -- a distance-based level of detail (LOD) transition, not two unrelated objects.</p>
+      <div class="grid"><div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABACAIAAAD07OL5AAAAsklEQVR4nGMUEZFgoCVgoqnpDKMWEAFGLSAIWEJDo7FKrF69FKv4w4ePsIqXlFQO0yBiGrVg+FvAuH79TqoYtGvXrmEaREyjFgx/C1hwSaSmxpNUH+wazQfkglELBnE+CMXRXtq1az9W8Z6e9mEaREyjFgx/Cxhx9ZNnz16IVdzNzRGr+Gj/gGwwasEgzgekglAc9cfQDyKmUQtG8HhRD452zi4c7aLhG0RMoxYQAkPfAgAHayFC0AhFEQAAAABJRU5ErkJggg==" width="32" height="64" alt="$989E">
+      <div class="label">$989E &middot; 1B wide</div>
+      <div class="src">gameplay/spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABACAIAAAD07OL5AAAAvElEQVR4nO2YIQ7DMAxFEytHKBhazzLiGxQNDPUGJT1L0MBQQfFym+4OJUO7gC0rUgrm/gdtKU/6SqI4cV3fQYL5FmqYplmsUzgYgsACApPYdRexkfNTrJdSxPqyvJxGRBCc+By0gpqtpACBCQQmaRjuVff7tn3Eet9fnUZEEPgXRG0+qKUo76X/j4gg8C+I+/6tut+zMjeM48NpRASBf0HS9rv2XjpfRASBf0HSGszc5D+VwsEQBBYQBIsfd/UezPTCx5gAAAAASUVORK5CYII=" width="32" height="64" alt="$9AA2">
+      <div class="label">$9AA2 &middot; 1B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABACAIAAAD07OL5AAAAsklEQVR4nO2YsQ2EMAxFHYsRKFjnGm9AdQUVG9DcLFQ3AfWluVnCJCzgYIKMxOX+K38kP8lSbCWhbTvSSGklD9ilyg4QmEBg0uQOYvyquchDzafpVWmLGIL6BSG3D7zgS6sTBAeAwCQsy6do7sfCPfH7LWII/ngf9P3TRcAuVXaAwASC8+8DEVHzcRzUfJ7flbaIIahf0JTO/ZT5R8I7+TQQ3OAeSGbue8GXVicIDgABWWywcRjhhiuBnAAAAABJRU5ErkJggg==" width="32" height="64" alt="$9AA3">
+      <div class="label">$9AA3 &middot; 1B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABACAIAAAD07OL5AAAAgklEQVR4nO3QoRHAIAyFYch1BEQnYgNURRUC3SFqmAjTqTBVXYDeoyKiuffL5C7fXXwIq9NMVK87AhMRgBGAEYARgBGAEYARgBGAEYAtb4uUtuE8xjic57wbfZEQsA/4Uo7hotbz06HWLqMvEgL2Ad/7rQqI6nVHYCICMAIwArD/Aw8IGAu7be9MQgAAAABJRU5ErkJggg==" width="32" height="64" alt="$A2A2">
+      <div class="label">$A2A2 &middot; 1B wide</div>
+      <div class="src">gameplay</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABACAIAAAD07OL5AAAAc0lEQVR4nO3YsQ2AIBBAUSCOQOFiVg5k40Q0zoKTuAD6LTAm5P/ySO4lVxJznsOXpU+3B4EXCWACmAAmgAlgApgAJoAJYAKYACaACWAC/wPT3cOyrM35vm/NeSnHoCdKAuMD8e7ftNazC5C6bHlIABMI1AUKwgh8xuhbgAAAAABJRU5ErkJggg==" width="32" height="64" alt="$A2A3">
+      <div class="label">$A2A3 &middot; 1B wide</div>
+      <div class="src">spin</div>
+    </div></div>
+    </section>
+    <section>
+      <h2>Ship fragment sheet ($9800-$AFxx) <span class="count">(16)</span></h2>
+      <p class="desc">CONFIRMED: this is the ship&#x27;s general close-range renderer, not spin-exclusive. RotationPhaseToFragment/PickSpinFragment assemble a triangular Rotofoil silhouette from these diagonal wedges every frame once the opponent is near, scaled/placed via a second math-table reader (sub_BD80, see docs/FINDINGS.md item 7). The match-end spin is the same mechanism forced to cycle at maximum speed. See docs/img/ship-lod-*.png for the live progression.</p>
+      <div class="grid"><div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOAAAABACAIAAACMU+xYAAABKklEQVR4nO3asU3DUBRA0QRlhBRM5A1SUVBlqlQUVC5Sx9OxQIxAyPwLOad04/+tq1c8eX88Pu9KLpe30Ucg5Gn0AeAzAiVNoKQJlDSBkiZQ0gRK2mHUi+07+QoTlDSBkiZQ0gRKmkBJEyhpAuWx96D2nfyECUqaQEkTKGkCJU2gpAmUNIHyGHtQ+062YIKSJlDSBEqaQEkTKGkCJU2g/K89qH0nv8kEJU2gpAmUNIGSJlDSBEqaQPmbe1D7TgpMUNIESppASRMoaQIlTaCkCZS0/fV6G30GWGWCkiZQ0gRKmkBJEyhpAiVNoKQdlmXZ9AXTNN19fj6/3n1+Or1sep55ft/0/9etv+e8cv41a/ca9f2/ey8TlDSBkiZQ0gRKmkBJEyhpAmVX9gH5lCEV8ns6JAAAAABJRU5ErkJggg==" width="224" height="64" alt="$9F1E">
+      <div class="label">$9F1E &middot; 7B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAABACAIAAADDDu+IAAABE0lEQVR4nO3asW3CYBhFUYMymzegoqD6p6JKkYqCOp6OCVxYF+RAzqlBMtbVVzxxuN9/J97HGJfpLznu/QC8NwGRCIhEQCQCIhEQiYBIDnagzzB22odcIBIBkQiIREAkAiIREImASOxAH268eB9ygUgERCIgEgGRCIhEQCQCIrED/VPjSfuQC0QiIBIBkQiIREAkAiIREIkdiLQPuUAkAiIREImASAREIiASAZHYgUj7kAtEIiASAZEIiERAJAIiERCJHYjEBSIREImASAREIiASAZEIiORrWZZNX7jdfjZ9/nr93vT/ktPpPO1h7XetPf+aZeP7fNZzrr23eZ5f+v5dIBIBkQiIREAkAiIREImAmIoHjO4qQdOhHPwAAAAASUVORK5CYII=" width="192" height="64" alt="$9F22">
+      <div class="label">$9F22 &middot; 6B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOAAAABACAIAAACMU+xYAAABBUlEQVR4nO3bsQnCYBhFURVHsHAxK0dL5RqZzjaFPxhi8ELOqROxuHzFg5xvt/tpjWl6rXoetrhseht2JlDSBEqaQEkTKGkCJU2gpAmUNIGSJlDSBEqaQEkTKGkCJU2gpF3XvjDP8z7/BD5wQUkTKGkCJU2gpAmUNIGSJlDSzmu/ix95PJ4/+R1YckFJEyhpAiVNoKQJlDSBkiZQjrGDjthH2cIFJU2gpAmUNIGSJlDSBEqaQDn2DjpiH+UbLihpAiVNoKQJlDSBkiZQ0gRK2t920BH7KEsuKGkCJU2gpAmUNIGSJlDSBEpabgcdsY8ekwtKmkBJEyhpAiVNoKQJlDSBcip7A6c2Cxsd8dwlAAAAAElFTkSuQmCC" width="224" height="64" alt="$A20A">
+      <div class="label">$A20A &middot; 7B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAABACAIAAADDDu+IAAAA8UlEQVR4nO3YIQ7CUBRFwULYJ4qlob5A09WhMCQVzYHQwoxuvzp54h5ut/sET5fLeVrjuOpreCEgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREMlpnuf2An/NBSIREImASAREIiASAZEIiOTUfmevxri+5R0XiERAJAIiERCJgEgERCIgEjvQjxtv2nuWuEAkAiIREImASAREIiASAZHYgX7E+PDes8QFIhEQiYBIBEQiIBIBkQiIxA60M+NLe88SF4hEQCQCIhEQiYBIBEQiIBI70EaNje09S1wgEgGRCIhEQCQCIhEQiYCYigcBFA/hGPhZtQAAAABJRU5ErkJggg==" width="192" height="64" alt="$A20E">
+      <div class="label">$A20E &middot; 6B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOAAAABACAIAAACMU+xYAAABAklEQVR4nO3YsQ3CQBQFQRtRggMac0RpjuiU1ImRE+sWmCngdMHqB29elsd0pXV9Xvo+v+02+gPwiUBJEyhpAiVNoKQJlDSBkjZfvYMesY9yhgtKmkBJEyhpAiVNoKQJlDSBkjZsBz1iH2XPBSVNoKQJlDSBkiZQ0gRKmkBJy+2gR+yj/8kFJU2gpAmUNIGSJlDSBEqaQEn7mh30iH30t7mgpAmUNIGSJlDSBEqaQEkTKGn36Uts22v0FxjABSVNoKQJlDSBkiZQ0gRKmkBJy+2g9k72XFDSBEqaQEkTKGkCJU2gpAmUtGE7qL2TM1xQ0gRKmkBJEyhpAiVNoKQJlKnsDTyzDGAQA5DaAAAAAElFTkSuQmCC" width="224" height="64" alt="$A51E">
+      <div class="label">$A51E &middot; 7B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAABACAIAAADDDu+IAAAA+ElEQVR4nO3YKxLCQBRFwYRin6gINGtCjUCzO1YQdSqVD91+Rp164s7P52viusZ4b/r/bdPfuTwBkQiIREAkAiIREImASO7tOf+y96xxgUgERCIgEgGRCIhEQCQCIrEDnczYae9Z4wKRCIhEQCQCIhEQiYBIBERiBzqocbC9Z40LRCIgEgGRCIhEQCQCIhEQiR1oZ+Mke88aF4hEQCQCIhEQiYBIBEQiIJL58/m2H9jEsjymM3CBSAREIiASAZEIiERAJAIisQOdzHKwfcgFIhEQiYBIBEQiIBIBkQiIxA50EctO+5ALRCIgEgGRCIhEQCQCIhEQU/ED+doVcQsO05YAAAAASUVORK5CYII=" width="192" height="64" alt="$A522">
+      <div class="label">$A522 &middot; 6B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAABACAIAAADDDu+IAAABEUlEQVR4nO3dsW3CUBRAUYMYgYJ1aJiIJhOkYQMq1vB0WYBQcHGib59TurAorl7x9Cx2x+NpGtn9/lj0/fM8P31+u31PW3K9fj19vv/zX8KqCIhEQCQCIhEQiYBIBESyswd67XI5L/r+0ZlAJAIiERCJgEgERCIgEgGRHKZB/Nfdjz3QayYQiYBIBEQiIBIBkQiIREBsYw+0tK195/UpJhCJgEgERCIgEgGRCIhEQKxrD+TuZywmEImASAREIiASAZEIiERArGsPtDR3P59lApEIiERAJAIiERCJgEgExJh7IHc/62ACkQiIREAkAiIREImASAREsrl7oN/+/5z3mEAkAiIREImASAREIiASATEVP2kQHcneOL2sAAAAAElFTkSuQmCC" width="192" height="64" alt="$A659">
+      <div class="label">$A659 &middot; 6B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAABACAIAAAAS6ev4AAAA+UlEQVR4nO3ZIY6DUBRAUdp0bWxjFDvAdGuYWVXNqIraUkc6/3KORADJzRMv7/J4/E0jWNf72+fzPB/63WX5mUZ2/fYPcCyB4wSOEzhO4DiB4wSOu4yyB+/Ztt9D37/Yg/nPBI4TOE7gOIHjBI4TOG74Pdid+DMTHCdwnMBxAscJHCdwnMBxw+/Be9yJX0xwnMBxAscJHCdwnMBxAsdl92B34hcTHCdwnMBxAscJHCdwnMBx2T14z3ayO7EJjhM4TuA4geMEjhM4TuC40+3B68nuxCY4TuA4geMEjhM4TuA4geNue3shDSY4TuA4geMEjhM4TuA4gae2J0h6LZ32Q2wDAAAAAElFTkSuQmCC" width="160" height="64" alt="$A65D">
+      <div class="label">$A65D &middot; 5B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAl0lEQVR4nOXXwQmAMBQE0XFICR7sPSc7tQiFMPEVsHzYy/7jPC9WmPP+JEfiJE7iJE7iJE7iJE7iJE7iJE7iJE7iRmX3b9uAxEmcxEmcxEmcxEmcxEmcxEmcxEncqOz+bRuQOImTOImTOImTOImTOImTOImTOPnbPzAX7f5tG5A4iZM4iZM4iZM4iZM4iZM4iZM4Vx/w1gNkKAgi3zaNGwAAAABJRU5ErkJggg==" width="64" height="64" alt="$A80A">
+      <div class="label">$A80A &middot; 2B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAABACAIAAADDDu+IAAAA0klEQVR4nO3asQ2AQBAEMZ5Gib4+YrqjiAEhwG7gktFFO/b9WHi/ObdH7q6PXOUzBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiGfZA3zZv3gn5QCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZHYA/3UvGgn5AORCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREYg9E2gn5QCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAbEUJxDhDX2oRml1AAAAAElFTkSuQmCC" width="192" height="64" alt="$A80E">
+      <div class="label">$A80E &middot; 6B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABACAIAAABqVuVZAAAAtElEQVR4nO3YsQ2EQBAEQSBRLOLDJjsyoB3Q6f6rEliptdas53ktMziOfcjdbcjViQgUBAoCBYGCQEGgIFAQKAgUBAoCBYGCQEGgsM6yB43aiXxQECgIFAQKAgWBgkBBoCBQECgIFAQKAgWBgkC/vgd9vRP5oCBQECgIFAQKAgWBgkBBoCBQECgIFAQKAgWB/nUPemsn8kFBoCBQECgIFAQKAgWBgkBBoCBQECgIFAQKAi3PbkpXDX15yShHAAAAAElFTkSuQmCC" width="96" height="64" alt="$A811">
+      <div class="label">$A811 &middot; 3B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAlElEQVR4nNXXMRHAIADAwBCjndDHXHcVUTguryBrxlovO8z5cIPESZzESZzESZzESZzESZzESZzESZzEjV0/cOsTJE7iJE7iJE7iJE7iJE7iJE7iJE7iJG6c/oHTnyBxEidxEidxEidxEidxEidxEidxEidx49YP7PoEiZM4iZM4iZM4iZM4iZM4iZM4iZM4bwf89QEILg19Y0aE3wAAAABJRU5ErkJggg==" width="64" height="64" alt="$A812">
+      <div class="label">$A812 &middot; 2B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABACAIAAABdtOgoAAAA90lEQVR4nO3ZsW3DMBBAUSbICC6yThqvloYbuMoami4LWI1h44vye6UKQcDHAeLx43L5HoXb7e+l79+27e7zOX/HkXzWH/DuBIgJEBMgJkBMgJgAsa9xUvNg//t7TEBMgJgAMQFiAsQEiAlw9nNAtfe/Xn/GCkxATICYADEBYgLEBIgJEFv+PmAusvffYwJiAsQEiAkQEyAmQEyAs5wD7P0fYwJiAsQEiAkQEyAmQEyA2DL3AXPxvf8eExATICZATICYADEBYgKsdg6w938uExATICZATICYADEBYgLEDncfME+6999jAmICxASICRATICZATIDR+gfDbxtk7fY3wQAAAABJRU5ErkJggg==" width="128" height="64" alt="$A85A">
+      <div class="label">$A85A &middot; 4B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABACAIAAABdtOgoAAAA7ElEQVR4nO3ZoRHCQBBA0YTi0gaKDs7QWgxVYVA4FEjmc+E9eebEnxU7u97vj+WXjHF9+75t21f/vVzOS+GU/MqLADEBYgLEBIgJEBMgtv7aHvDJvt+Wb7IH/CkBYgLEBIgJEBMgJkBsmj1gHPROYAJiAsQEiAkQEyAmQEyA2DR7wFHvBCYgJkBMgJgAMQFiAsQEiE2/B4zJ7wQmICZATICYADEBYgLEBIhNvwfMficwATEBYgLEBIgJEBMgJkDssHvAmOROYAJiAsQEiAkQEyAmQEyA2GH3gFnuBCYgJkBMgJgAMQFiAsQEWFpPAK4yeZhYQzgAAAAASUVORK5CYII=" width="128" height="64" alt="$A85D">
+      <div class="label">$A85D &middot; 4B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABACAIAAABqVuVZAAABDUlEQVR4nO3YsQ2CQBSAYTCOQGEl27ABlYUVG9A4C5WFFRuwzTmJCxz+OXMHav6vfCQUf654eXXTnKocQnhG5217js6n6R6dD8M1Ou/7S3TedV2Vw7Is0fkhy9//mIGAgYCBgIGAgYCBwHHtQ+qeMo63pP0l1Tw/iu5Ba3xBwEDAQMBAwEDAQMBAoM51D0q9E6VauyuV5gsCBgIGAgYCBgIGAgbaag8Kmfadb9uPfEHAQMBAwEDAQMBAwEDAQMBAwEDAQMBAwEDAQMBAue9BYae7z153Il8QMBAwEDAQMBAwEDAQMBAwEDAQMBAwEDAQMBAw0Kf3oF+5+5S+E/mCgIGAgYCBgIGAgYCBqvdebJ8f9gezQ20AAAAASUVORK5CYII=" width="96" height="64" alt="$AABF">
+      <div class="label">$AABF &middot; 3B wide</div>
+      <div class="src">spin</div>
+    </div>
+<div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABACAIAAABqVuVZAAABYklEQVR4nO3bsU3DQBSA4TPyCCmo8Cw0t0EqCqpskIYJaLKBKwoqF6lxwyxhhzRULHCPXy/yCQn9X3mKHOvXFU9ne7hev0vLND001+f5rbl+ODyXjOg6tT4214/Hl+b6sryXnu66Xv0fMBAwEDAQMBAwEDAQGLead/b7p+Z6rTV1ncvlq/QU3WfEHQQMBAwEDAQMBAwEDATG0tm6rsnff6bmqeg8aKu5zB0EDAQMBAwEDAQMBAwExmheyD7nWpLPp6Lzpq3mqez9ROdQ7iBgIGAgYCBgIGAgYKBbz4OiOWVNziNZ2edl0flOVnQO5Q4CBgIGAgYCBgIGAgYCw2533/X9oNPptbmefS8pmr+ic59obor+N+IOAgYCBgIGAgYCBgIGAsP5/JH6bmtKzhHZ956z18+K5rVonnIHAQMBAwEDAQMBAwED3XoetJV5o+/s/4o7CBgIGAgYCBgIGAgYqPzuByvZVFyfWPFPAAAAAElFTkSuQmCC" width="96" height="64" alt="$AF8F">
+      <div class="label">$AF8F &middot; 3B wide</div>
+      <div class="src">spin</div>
+    </div></div>
+    </section>
+
+<h2>ROM coverage map</h2>
+<p class="desc">One pixel per ROM byte ($8000-$FFFF), 256 bytes per row. Green = reached as code by the disassembler. Blue = known graphics/data with reader evidence. Gold = live-referenced by display lists during run-01/02/03 replays (line-planar spread, not yet annotated). Red = unaccounted for.</p>
+<div class="coverage-wrap">
+  <img src="data:image/png;base64,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" width="768" height="384">
+  <div class="stats">
+    <div><span class="swatch" style="background:#468f5a"></span>Code: 19273 bytes (58.8%)</div>
+    <div><span class="swatch" style="background:#4664c8"></span>Known graphics/data: 9247 bytes (28.2%)</div>
+    <div><span class="swatch" style="background:#b48c3c"></span>Live-referenced (unannotated): 2937 bytes (9.0%)</div>
+    <div><span class="swatch" style="background:#c83c3c"></span>Unaccounted for: 1311 bytes (4.0%)</div>
+  </div>
+</div>
+
+<h2>Unaccounted-for regions (16+ contiguous bytes)</h2>
+<p class="note">Gold regions on the map above are floor-tile and ship-fragment sheet slots confirmed referenced by live display lists across all three replays but not yet promoted to annotation blocks (they share the same per-page slot layout as the already-annotated tiles, so they are the same type of data -- animation phases not hit by the original three captures). The remaining red gaps are either alignment padding, untraced code paths, or sub-byte tables that need further reader tracing. $9000-$96FF is confirmed NOT graphics -- a monotonic perspective-divide curve (see docs/FINDINGS.md).</p>
+<table>
+<tr><th>range</th><th>bytes</th><th>note</th></tr>
+<tr><td>$88D9-$88FD</td><td>37</td><td></td></tr>
+<tr><td>$89D9-$89FD</td><td>37</td><td></td></tr>
+<tr><td>$8AD9-$8AFD</td><td>37</td><td></td></tr>
+<tr><td>$8BD9-$8BFD</td><td>37</td><td></td></tr>
+<tr><td>$8CD9-$8CFD</td><td>37</td><td></td></tr>
+<tr><td>$8DD9-$8DFD</td><td>37</td><td></td></tr>
+<tr><td>$8ED9-$8EFD</td><td>37</td><td></td></tr>
+<tr><td>$8FD9-$8FFD</td><td>37</td><td></td></tr>
+<tr><td>$9760-$9783</td><td>36</td><td></td></tr>
+<tr><td>$9CE5-$9CF4</td><td>16</td><td></td></tr>
+<tr><td>$9FC6-$9FF9</td><td>52</td><td></td></tr>
+<tr><td>$A8C5-$A8DC</td><td>24</td><td></td></tr>
+<tr><td>$A8E9-$A8F9</td><td>17</td><td></td></tr>
+<tr><td>$A9C5-$A9DC</td><td>24</td><td></td></tr>
+<tr><td>$A9E9-$A9F9</td><td>17</td><td></td></tr>
+<tr><td>$AAC5-$AADC</td><td>24</td><td></td></tr>
+<tr><td>$AAE9-$AAF9</td><td>17</td><td></td></tr>
+<tr><td>$ABC5-$ABDC</td><td>24</td><td></td></tr>
+<tr><td>$ABE9-$ABF9</td><td>17</td><td></td></tr>
+<tr><td>$ACC5-$ACDC</td><td>24</td><td></td></tr>
+<tr><td>$ACE9-$ACF9</td><td>17</td><td></td></tr>
+<tr><td>$ADC5-$ADDC</td><td>24</td><td></td></tr>
+<tr><td>$ADE9-$ADF9</td><td>17</td><td></td></tr>
+<tr><td>$AEC5-$AEDC</td><td>24</td><td></td></tr>
+<tr><td>$AEE9-$AEF9</td><td>17</td><td></td></tr>
+<tr><td>$AFC5-$AFDC</td><td>24</td><td></td></tr>
+<tr><td>$AFE9-$AFF9</td><td>17</td><td></td></tr>
+<tr><td>$BA26-$BA35</td><td>16</td><td></td></tr>
+<tr><td>$BC43-$BC52</td><td>16</td><td></td></tr>
+<tr><td>$CE91-$CEC0</td><td>48</td><td></td></tr>
+<tr><td>$CFF7-$D01C</td><td>38</td><td></td></tr>
+<tr><td>$DE25-$DE44</td><td>32</td><td></td></tr>
+<tr><td>$E0CC-$E0EF</td><td>36</td><td></td></tr>
+<tr><td>$FE4A-$FEDC</td><td>147</td><td></td></tr>
+</table>
