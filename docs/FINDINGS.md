@@ -130,7 +130,7 @@ readout, and the `HUMAN`/`DROID` difficulty-select screen all live in the
 same sheet. Rendered and eyeballed with `tools/gfx.py`; `CHARBASE` points
 here directly.
 
-## Confirmed: the display list is rebuilt in RAM every frame
+## Confirmed: the display list is copied once from a template, then edited in RAM every frame
 
 The 7800's MARIA chip has no hardware scaling -- every "3D" effect on this
 hardware comes from choosing which pre-drawn graphics (and how tall a zone)
@@ -139,6 +139,20 @@ to use per horizontal band, redone every frame. `InitDisplayListTemplate`
 (zone headers, initial graphics pointers) from ROM tables (`dat_DEA9`,
 `dat_DF1A`, `dat_DED5`, ...) into the live list at `$26xx`-`$27xx` once at
 boot.
+
+**Corrected 2026-11-08:** this heading used to read "the display list is
+rebuilt in RAM every frame". The paragraph under it already said the
+template copy runs once, and the code agrees: `InitDisplayListTemplate`'s
+only caller is `$9923`, the tail of `sub_98C0`, which `ENTRY_Reset` calls
+at `$BA58`. Nothing copies or rebuilds the list after that. What changes
+every frame is single bytes written into the existing entries in place:
+`PokeDisplayListByte` (`$CEDE`) for the ship's fragment ids (live, see
+`rom:BD80`), the floor's graphics-address low bytes (`ram_2548`/`254C`,
+`ram_250C`/`2510`, ... written by `sub_F2FB` -- the same entries
+`sub_DE7D` seeds at boot), and the horizontal-position bytes
+`DrawGridScanlines` stores through `(ram_0047),Y`. So the choice of
+graphics is redone every frame, but the list itself is built once and
+then poked.
 
 A real, live display list was captured directly off a running session (not
 guessed statically), with:
@@ -432,6 +446,45 @@ scroll) at different rates depending on which gate table and bit apply to
 them. Rows near the horizon change slowly; rows near the viewer race --
 exactly the speed gradient a receding floor needs, done with table lookups
 and bit tests, no multiplication or division anywhere in the path.
+
+**Corrected 2026-11-08: what `$F7CD` is.** This section called `dat_F7CD`
+a gate table; `annotations.json` called it colour-phase step deltas. Reading
+all of its users settles it as one table read two ways:
+
+* `$F7CD`, `$F7D8`, `$F7E3`, `$F7EE`, `$F7F9`, `$F804` are six 11-byte
+  tables, one per floor band, of signed even step values (`$F7CD` =
+  `$0A,$08,$06,$04,$02,$00,$FE,...,$F6`), zero in the middle entry, with
+  the two halves equal and opposite. `X` (0-10) comes from `sub_EAE5` (`$EAE5`-`$EB27`):
+  the ship coordinate in `ram_22FA` (which `sub_F89D` copies from `ram_00A9,X`
+  or `ram_008E,X`, chosen by `RotationPhase`), measured against 5 and against
+  `dat_EAD3` (`$0F`/`$31`), clamped and centred on 5. So `X`-5 plausibly
+  reads as how far that coordinate lies past an edge threshold, a kind of
+  distance. Nothing shifts `X`; the old text's error was that it said the
+  index gets shifted, when it is the table byte that gets shifted.
+* **As step deltas** (`sub_F2FB`, `$F314`/`$F341`/`$F369`/...): each band's
+  value goes to `ram_0066`, and the unrolled `sub_F3E9`/`sub_F412` add it
+  once per row to a running value and store, per row, the running value
+  minus the cell's current contents (`TAX / SEC / SBC ram_21FF,Y /
+  STA ram_21FF,Y`, then `TXA` to restore the running value) into the cells
+  `ram_21F8+Y`-`ram_21FF+Y` (`Y` = `ram_0065`, `$60` or `$30`, 8 less
+  per band) -- the block that holds the "edge" values `DrawGridScanlines`
+  reads at `ram_2230+8n`. So the bytes step the edge (position) cells, not
+  the colour-phase cells.
+* **As a gate** (`sub_F44D` and `sub_F60D`, which `$EB41`/`$EB44` jump to
+  straight after `sub_F2FB`): `LDA dat_F7CD,X / LSR A / LSR A / BCC skip`
+  moves bit 1 *of the table byte* into carry, and only when it's set does
+  that band's group of colour-phase cells take one `ColorCycleSuccessor`
+  step. Bit 1 is set for `$0A,$06,$02,$FE,$FA,$F6` and clear for
+  `$08,$04,$00,$FC,$F8`.
+
+So both readings were half right: the annotations' "step deltas" is what the
+bytes are, and this section's "gate" is a second use of their bit 1. The
+earlier wording above ("picked by shifting a distance-derived index") was
+wrong about what gets shifted. Still open: the middle entry (`X` = 5) is 0 in all six tables, so at
+the centre this path advances none of the colour-phase cells. That means
+the far-crawl/near-race explanation above is a reading of the picture that
+this gate alone doesn't account for; it needs a live look at `X` and the
+cells before it's called confirmed.
 
 `AdvanceRowColorPhase` is called once per zone from the per-frame geometry
 pass around `$F900`-`$F998`, whose `Y`-indexed loop (`sub_F998`) writes the
@@ -1521,6 +1574,15 @@ tracer had no path to it because it is reached through a computed JMP
 table in the generative audio engine (see rom:B338's random-gated
 branch); now registered as entry rom:B15E ('AttractAudioFork'), the
 tracer reaches it and byte-identity still holds.
+
+Corrected 2026-11-08: the route in is not $B338. $B338 is the random-gated
+*read* (`CMP RANDOM` at $B333, `BCS` past it at $B336, then
+`LDA GenerativeMusicStream,Y` at $B338), with no jump anywhere near it.
+$B15E is entered through the indirect `JMP (SongDoneVecLo)` at $B256,
+which ThemeSongTick takes when the stream hits its $00 end byte;
+LoadThemeSong sets that vector to $B15E at $B20C-$B213 (and `sub_B03D`
+sets it to $B35C at $B03D-$B044). It's one vector, not a table, and the
+static tracer can't follow it, which is why it never reached $B15E.
 
 ### Sheet slots: confirmed by live DL refs
 
